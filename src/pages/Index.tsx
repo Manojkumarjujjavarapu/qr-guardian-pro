@@ -1,13 +1,13 @@
 import { useState, useCallback } from 'react';
-import { Shield, Scan, Info } from 'lucide-react';
+import { Shield, Scan, BarChart3, Settings } from 'lucide-react';
 import { QRScanner } from '@/components/QRScanner';
 import { ScanResult } from '@/components/ScanResult';
 import { ScanHistory } from '@/components/ScanHistory';
 import { ManualInput } from '@/components/ManualInput';
 import { analyzeUrl, AnalysisResult } from '@/lib/urlAnalyzer';
 import { useToast } from '@/hooks/use-toast';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 
 const Index = () => {
   const [scannerActive, setScannerActive] = useState(false);
@@ -48,146 +48,145 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background grid-background">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-50">
+      <header className="border-b border-border bg-card sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-primary/10 rounded-lg">
-              <Shield className="w-6 h-6 text-primary" />
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-6">
+              <span className="text-sm text-muted-foreground hover:text-foreground cursor-pointer">Scanner</span>
+              <span className="text-sm text-muted-foreground hover:text-foreground cursor-pointer">Dashboard</span>
+              <span className="text-sm text-muted-foreground hover:text-foreground cursor-pointer">History</span>
             </div>
-            <div>
-              <h1 className="text-xl font-bold">QR Shield</h1>
-              <p className="text-xs text-muted-foreground">Malicious QR Code Detection</p>
+            <div className="flex items-center gap-4">
+              <Settings className="w-5 h-5 text-muted-foreground hover:text-foreground cursor-pointer" />
+              <Button variant="outline" size="sm">
+                Sign In
+              </Button>
             </div>
           </div>
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="container mx-auto px-4 py-6 max-w-2xl">
-        <Tabs defaultValue="scan" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="scan" className="gap-2">
-              <Scan className="w-4 h-4" />
-              Scan QR
-            </TabsTrigger>
-            <TabsTrigger value="info" className="gap-2">
-              <Info className="w-4 h-4" />
-              How it Works
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="scan" className="space-y-6">
-            {/* QR Scanner */}
-            <QRScanner
-              onScan={handleScan}
-              isActive={scannerActive}
-              onToggle={() => setScannerActive(!scannerActive)}
-            />
-
-            {/* Manual URL Input */}
-            <div className="space-y-2">
-              <p className="text-sm text-muted-foreground text-center">
-                Or enter a URL manually:
-              </p>
-              <ManualInput onAnalyze={handleAnalyze} />
+      {/* Hero Section */}
+      <section className="py-16 text-center">
+        <div className="container mx-auto px-4">
+          <div className="flex justify-center mb-6">
+            <div className="p-4 bg-primary/10 rounded-full">
+              <Shield className="w-16 h-16 text-primary" />
             </div>
+          </div>
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">Scan QR Codes Safely</h1>
+          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+            Advanced AI-powered security scanner that detects malicious URLs, phishing attempts, and security threats in QR codes
+          </p>
+        </div>
+      </section>
 
-            {/* Current Result */}
-            {currentResult && (
-              <div className="animate-in fade-in slide-in-from-bottom-4 duration-300">
-                <ScanResult result={currentResult} />
+      {/* Feature Cards */}
+      <section className="pb-12">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+            <Card className="bg-card border-border">
+              <CardContent className="pt-6 text-center">
+                <div className="flex justify-center mb-4">
+                  <div className="p-3 bg-primary/10 rounded-lg">
+                    <Scan className="w-6 h-6 text-primary" />
+                  </div>
+                </div>
+                <h3 className="font-semibold mb-2">Real-time Scanning</h3>
+                <p className="text-sm text-muted-foreground">
+                  Upload images or use camera to scan QR codes instantly
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-card border-border">
+              <CardContent className="pt-6 text-center">
+                <div className="flex justify-center mb-4">
+                  <div className="p-3 bg-primary/10 rounded-lg">
+                    <Shield className="w-6 h-6 text-primary" />
+                  </div>
+                </div>
+                <h3 className="font-semibold mb-2">AI-Powered Detection</h3>
+                <p className="text-sm text-muted-foreground">
+                  Advanced algorithms detect malicious URLs and threats
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-card border-border">
+              <CardContent className="pt-6 text-center">
+                <div className="flex justify-center mb-4">
+                  <div className="p-3 bg-primary/10 rounded-lg">
+                    <BarChart3 className="w-6 h-6 text-primary" />
+                  </div>
+                </div>
+                <h3 className="font-semibold mb-2">Detailed Analytics</h3>
+                <p className="text-sm text-muted-foreground">
+                  Track scan history and security metrics over time
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* Scanner Section */}
+      <section className="pb-16">
+        <div className="container mx-auto px-4 max-w-2xl">
+          <Card className="bg-card border-border">
+            <CardHeader>
+              <CardTitle className="text-center">QR Code Scanner</CardTitle>
+              <p className="text-center text-sm text-muted-foreground">
+                Upload or scan QR codes for security analysis
+              </p>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* QR Scanner */}
+              <QRScanner
+                onScan={handleScan}
+                isActive={scannerActive}
+                onToggle={() => setScannerActive(!scannerActive)}
+              />
+
+              {/* Manual URL Input */}
+              <div className="space-y-2">
+                <p className="text-sm text-muted-foreground text-center">
+                  Or enter a URL manually:
+                </p>
+                <ManualInput onAnalyze={handleAnalyze} />
               </div>
-            )}
 
-            {/* History */}
+              {/* Current Result */}
+              {currentResult && (
+                <div className="animate-in fade-in slide-in-from-bottom-4 duration-300">
+                  <ScanResult result={currentResult} />
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* History */}
+          <div className="mt-6">
             <ScanHistory
               history={history}
               onSelect={handleSelectFromHistory}
               onClear={handleClearHistory}
             />
-          </TabsContent>
+          </div>
+        </div>
+      </section>
 
-          <TabsContent value="info" className="space-y-4">
-            <Card>
-              <CardContent className="pt-6 space-y-4">
-                <h2 className="text-lg font-semibold">How QR Shield Works</h2>
-                <p className="text-sm text-muted-foreground">
-                  QR Shield analyzes URLs from QR codes using multiple detection techniques 
-                  to identify potential threats before you click.
-                </p>
-
-                <div className="space-y-3">
-                  <div className="flex gap-3">
-                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                      <span className="text-primary font-bold">1</span>
-                    </div>
-                    <div>
-                      <h3 className="font-medium">URL Structure Analysis</h3>
-                      <p className="text-sm text-muted-foreground">
-                        Checks for IP addresses, suspicious TLDs, excessive subdomains, and non-standard ports.
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-3">
-                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                      <span className="text-primary font-bold">2</span>
-                    </div>
-                    <div>
-                      <h3 className="font-medium">Phishing Detection</h3>
-                      <p className="text-sm text-muted-foreground">
-                        Scans for common phishing keywords and homograph attacks using look-alike characters.
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-3">
-                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                      <span className="text-primary font-bold">3</span>
-                    </div>
-                    <div>
-                      <h3 className="font-medium">Malware Indicators</h3>
-                      <p className="text-sm text-muted-foreground">
-                        Detects suspicious file extensions, URL shorteners, and redirect chains.
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-3">
-                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                      <span className="text-primary font-bold">4</span>
-                    </div>
-                    <div>
-                      <h3 className="font-medium">Risk Scoring</h3>
-                      <p className="text-sm text-muted-foreground">
-                        Combines all factors into a risk score: Safe (0-19%), Suspicious (20-49%), Malicious (50-100%).
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-muted/50 rounded-lg p-4 mt-4">
-                  <p className="text-xs text-muted-foreground">
-                    <strong>Note:</strong> While QR Shield provides robust analysis, no tool can guarantee 
-                    100% detection. Always exercise caution with unfamiliar URLs.
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
-      </main>
-
-      {/* Footer */}
-      <footer className="border-t border-border bg-card/50 mt-auto">
-        <div className="container mx-auto px-4 py-4 text-center">
-          <p className="text-xs text-muted-foreground">
-            QR Shield • Real-time Malicious QR Detection
+      {/* Explore More Section */}
+      <section className="py-12 border-t border-border">
+        <div className="container mx-auto px-4 text-center">
+          <h2 className="text-2xl font-bold mb-2">Explore More Features</h2>
+          <p className="text-muted-foreground">
+            SecureQR: AI-Powered Security
           </p>
         </div>
-      </footer>
+      </section>
     </div>
   );
 };
