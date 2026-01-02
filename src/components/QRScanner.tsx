@@ -129,22 +129,85 @@ export function QRScanner({ onScan, isActive, onToggle }: QRScannerProps) {
 
   return (
     <div className="relative">
-      <Tabs defaultValue="camera" className="w-full">
+      <Tabs defaultValue="upload" className="w-full">
         <TabsList className="grid w-full grid-cols-2 mb-4">
-          <TabsTrigger value="camera" className="gap-2">
-            <Camera className="w-4 h-4" />
-            Camera
-          </TabsTrigger>
           <TabsTrigger value="upload" className="gap-2">
             <Upload className="w-4 h-4" />
             Upload Image
           </TabsTrigger>
+          <TabsTrigger value="camera" className="gap-2">
+            <Camera className="w-4 h-4" />
+            Use Camera
+          </TabsTrigger>
         </TabsList>
+
+        <TabsContent value="upload">
+          {/* Hidden div for file scanning */}
+          <div id="qr-file-reader" className="hidden" />
+          
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleFileChange}
+            className="hidden"
+          />
+
+          <div
+            className={cn(
+              'relative overflow-hidden rounded-xl border-2 border-dashed transition-all duration-300 cursor-pointer',
+              dragActive ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50',
+              'bg-card'
+            )}
+            onClick={() => fileInputRef.current?.click()}
+            onDragEnter={handleDrag}
+            onDragLeave={handleDrag}
+            onDragOver={handleDrag}
+            onDrop={handleDrop}
+          >
+            <div className="w-full py-16 flex flex-col items-center justify-center p-8">
+              {isProcessingFile ? (
+                <>
+                  <div className="w-12 h-12 border-2 border-primary border-t-transparent rounded-full animate-spin mb-4" />
+                  <p className="text-muted-foreground text-sm">Scanning QR code...</p>
+                </>
+              ) : (
+                <>
+                  <div className={cn(
+                    'p-4 rounded-full mb-4 transition-colors',
+                    dragActive ? 'bg-primary/20' : 'bg-muted'
+                  )}>
+                    <ImageIcon className={cn(
+                      'w-10 h-10',
+                      dragActive ? 'text-primary' : 'text-muted-foreground'
+                    )} />
+                  </div>
+                  <p className="text-foreground font-medium mb-2">
+                    {dragActive ? 'Drop image here' : 'Upload QR Code Image'}
+                  </p>
+                  <Button variant="outline" size="sm" className="gap-2 mb-3">
+                    <Upload className="w-4 h-4" />
+                    Browse & Upload
+                  </Button>
+                  <p className="text-muted-foreground text-xs">
+                    Select an image file containing a QR code (JPG, PNG, etc.)
+                  </p>
+                </>
+              )}
+            </div>
+
+            {error && (
+              <div className="absolute bottom-0 left-0 right-0 p-3 bg-destructive/10">
+                <p className="text-destructive text-sm text-center">{error}</p>
+              </div>
+            )}
+          </div>
+        </TabsContent>
 
         <TabsContent value="camera">
           <div
             className={cn(
-              'relative overflow-hidden rounded-2xl border-2 transition-all duration-300',
+              'relative overflow-hidden rounded-xl border-2 transition-all duration-300',
               isActive ? 'border-primary glow-primary' : 'border-border',
               'bg-card'
             )}
@@ -199,80 +262,6 @@ export function QRScanner({ onScan, isActive, onToggle }: QRScannerProps) {
                   Start Scanner
                 </>
               )}
-            </Button>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="upload">
-          {/* Hidden div for file scanning */}
-          <div id="qr-file-reader" className="hidden" />
-          
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            onChange={handleFileChange}
-            className="hidden"
-          />
-
-          <div
-            className={cn(
-              'relative overflow-hidden rounded-2xl border-2 border-dashed transition-all duration-300 cursor-pointer',
-              dragActive ? 'border-primary bg-primary/5 glow-primary' : 'border-border hover:border-primary/50',
-              'bg-card'
-            )}
-            onClick={() => fileInputRef.current?.click()}
-            onDragEnter={handleDrag}
-            onDragLeave={handleDrag}
-            onDragOver={handleDrag}
-            onDrop={handleDrop}
-          >
-            <div className="w-full aspect-square flex flex-col items-center justify-center p-8">
-              {isProcessingFile ? (
-                <>
-                  <div className="w-12 h-12 border-2 border-primary border-t-transparent rounded-full animate-spin mb-4" />
-                  <p className="text-muted-foreground text-sm">Scanning QR code...</p>
-                </>
-              ) : (
-                <>
-                  <div className={cn(
-                    'p-4 rounded-full mb-4 transition-colors',
-                    dragActive ? 'bg-primary/20' : 'bg-muted'
-                  )}>
-                    <ImageIcon className={cn(
-                      'w-12 h-12',
-                      dragActive ? 'text-primary' : 'text-muted-foreground'
-                    )} />
-                  </div>
-                  <p className="text-foreground font-medium mb-2">
-                    {dragActive ? 'Drop image here' : 'Upload QR Code Image'}
-                  </p>
-                  <p className="text-muted-foreground text-sm text-center">
-                    Drag & drop an image here, or click to browse
-                  </p>
-                  <p className="text-muted-foreground text-xs mt-2">
-                    Supports JPG, PNG, GIF, WebP
-                  </p>
-                </>
-              )}
-            </div>
-
-            {error && (
-              <div className="absolute bottom-0 left-0 right-0 p-3 bg-destructive/10">
-                <p className="text-destructive text-sm text-center">{error}</p>
-              </div>
-            )}
-          </div>
-
-          <div className="mt-4 flex justify-center">
-            <Button
-              onClick={() => fileInputRef.current?.click()}
-              size="lg"
-              className="gap-2"
-              disabled={isProcessingFile}
-            >
-              <Upload className="w-5 h-5" />
-              Choose Image
             </Button>
           </div>
         </TabsContent>
