@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { Shield, Scan, BarChart3, Settings } from 'lucide-react';
+import { Shield, Scan, BarChart3 } from 'lucide-react';
 import { QRScanner } from '@/components/QRScanner';
 import { ScanResult } from '@/components/ScanResult';
 import { ScanHistory } from '@/components/ScanHistory';
@@ -7,7 +7,7 @@ import { ManualInput } from '@/components/ManualInput';
 import { analyzeUrl, AnalysisResult } from '@/lib/urlAnalyzer';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
 
 const Index = () => {
   const [scannerActive, setScannerActive] = useState(false);
@@ -54,16 +54,15 @@ const Index = () => {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-6">
-              <span className="text-sm text-muted-foreground hover:text-foreground cursor-pointer">Scanner</span>
-              <span className="text-sm text-muted-foreground hover:text-foreground cursor-pointer">Dashboard</span>
-              <span className="text-sm text-muted-foreground hover:text-foreground cursor-pointer">History</span>
+              <Link to="/" className="text-sm text-foreground font-medium">Scanner</Link>
+              <Link to="/dashboard" className="text-sm text-muted-foreground hover:text-foreground">Dashboard</Link>
+              <Link to="/history" className="text-sm text-muted-foreground hover:text-foreground">History</Link>
             </div>
-            <div className="flex items-center gap-4">
-              <Settings className="w-5 h-5 text-muted-foreground hover:text-foreground cursor-pointer" />
-              <Button variant="outline" size="sm">
+            <Link to="/auth">
+              <button className="px-4 py-2 text-sm border border-border rounded-lg hover:bg-accent">
                 Sign In
-              </Button>
-            </div>
+              </button>
+            </Link>
           </div>
         </div>
       </header>
