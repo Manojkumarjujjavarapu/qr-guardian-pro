@@ -1,5 +1,6 @@
 import { Shield, Scan, AlertTriangle, CheckCircle, TrendingUp, Clock, Activity } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { PieChart, Pie, Cell, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, Legend } from 'recharts';
 
@@ -60,9 +61,9 @@ const Dashboard = () => {
               <Link to="/history" className="text-sm text-muted-foreground hover:text-foreground">History</Link>
             </div>
             <Link to="/auth">
-              <button className="px-4 py-2 text-sm border border-border rounded-lg hover:bg-accent">
+              <Button variant="outline" size="sm" className="border-primary text-primary hover:bg-primary hover:text-primary-foreground">
                 Sign In
-              </button>
+              </Button>
             </Link>
           </div>
         </div>
@@ -71,7 +72,7 @@ const Dashboard = () => {
       <main className="container mx-auto px-4 py-8">
         {/* Page Title */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Dashboard</h1>
+          <h1 className="text-3xl font-bold mb-2 text-foreground">Dashboard</h1>
           <p className="text-muted-foreground">Overview of your QR code scanning activity</p>
         </div>
 

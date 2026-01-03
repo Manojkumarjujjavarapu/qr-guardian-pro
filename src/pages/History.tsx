@@ -4,32 +4,18 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Link } from 'react-router-dom';
-
-interface HistoryItem {
-  id: number;
-  url: string;
-  status: 'safe' | 'suspicious' | 'malicious';
-  riskScore: number;
-  timestamp: string;
-}
+import { useScanHistory } from '@/context/ScanHistoryContext';
+import { useToast } from '@/hooks/use-toast';
 
 const History = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('all');
+  const { history, clearHistory } = useScanHistory();
+  const { toast } = useToast();
 
-  // Mock history data
-  const [historyData] = useState<HistoryItem[]>([
-    { id: 1, url: 'https://google.com', status: 'safe', riskScore: 5, timestamp: '2024-01-15 10:30 AM' },
-    { id: 2, url: 'https://suspicious-link.xyz/login', status: 'suspicious', riskScore: 45, timestamp: '2024-01-15 09:15 AM' },
-    { id: 3, url: 'https://github.com', status: 'safe', riskScore: 2, timestamp: '2024-01-14 04:20 PM' },
-    { id: 4, url: 'https://phishing-site.tk/bank', status: 'malicious', riskScore: 85, timestamp: '2024-01-14 02:00 PM' },
-    { id: 5, url: 'https://example.com', status: 'safe', riskScore: 8, timestamp: '2024-01-14 11:30 AM' },
-    { id: 6, url: 'https://free-prize.win', status: 'malicious', riskScore: 92, timestamp: '2024-01-13 03:45 PM' },
-  ]);
-
-  const filteredHistory = historyData.filter(item => {
+  const filteredHistory = history.filter(item => {
     const matchesSearch = item.url.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesFilter = filterStatus === 'all' || item.status === filterStatus;
+    const matchesFilter = filterStatus === 'all' || item.threatLevel === filterStatus;
     return matchesSearch && matchesFilter;
   });
 
@@ -60,6 +46,14 @@ const History = () => {
     }
   };
 
+  const handleClearHistory = () => {
+    clearHistory();
+    toast({
+      title: 'History Cleared',
+      description: 'All scan history has been cleared',
+    });
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -72,9 +66,9 @@ const History = () => {
               <Link to="/history" className="text-sm text-foreground font-medium">History</Link>
             </div>
             <Link to="/auth">
-              <button className="px-4 py-2 text-sm border border-border rounded-lg hover:bg-accent">
+              <Button variant="outline" size="sm" className="border-primary text-primary hover:bg-primary hover:text-primary-foreground">
                 Sign In
-              </button>
+              </Button>
             </Link>
           </div>
         </div>
@@ -83,7 +77,7 @@ const History = () => {
       <main className="container mx-auto px-4 py-8">
         {/* Page Title */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Scan History</h1>
+          <h1 className="text-3xl font-bold mb-2 text-foreground">Scan History</h1>
           <p className="text-muted-foreground">View and manage your past QR code scans</p>
         </div>
 
@@ -138,8 +132,8 @@ const History = () => {
         <Card className="bg-card border-border">
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle>Scanned URLs</CardTitle>
-              <Button variant="ghost" size="sm" className="text-muted-foreground">
+              <CardTitle className="text-foreground">Scanned URLs</CardTitle>
+              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-destructive" onClick={handleClearHistory}>
                 <Trash2 className="w-4 h-4 mr-2" />
                 Clear All
               </Button>
@@ -149,23 +143,27 @@ const History = () => {
             {filteredHistory.length === 0 ? (
               <div className="text-center py-12">
                 <Filter className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-                <p className="text-muted-foreground">No results found</p>
+                <p className="text-muted-foreground">
+                  {history.length === 0 ? 'No scans yet. Scan a QR code to see results here.' : 'No results found'}
+                </p>
               </div>
             ) : (
               <div className="space-y-3">
-                {filteredHistory.map((item) => (
+                {filteredHistory.map((item, index) => (
                   <div
-                    key={item.id}
+                    key={index}
                     className="flex items-center justify-between p-4 bg-muted/30 rounded-lg hover:bg-muted/50 transition-colors"
                   >
                     <div className="flex items-center gap-4">
-                      {getStatusIcon(item.status)}
+                      {getStatusIcon(item.threatLevel)}
                       <div>
-                        <p className="font-mono text-sm truncate max-w-md">{item.url}</p>
-                        <p className="text-xs text-muted-foreground">{item.timestamp}</p>
+                        <p className="font-mono text-sm truncate max-w-md text-foreground">{item.url}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {item.timestamp.toLocaleString()}
+                        </p>
                       </div>
                     </div>
-                    {getStatusBadge(item.status, item.riskScore)}
+                    {getStatusBadge(item.threatLevel, item.riskScore)}
                   </div>
                 ))}
               </div>
