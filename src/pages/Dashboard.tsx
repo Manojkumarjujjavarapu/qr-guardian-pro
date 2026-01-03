@@ -1,6 +1,7 @@
-import { Shield, Scan, AlertTriangle, CheckCircle, TrendingUp, Clock } from 'lucide-react';
+import { Shield, Scan, AlertTriangle, CheckCircle, TrendingUp, Clock, Activity } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
+import { PieChart, Pie, Cell, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, Legend } from 'recharts';
 
 const Dashboard = () => {
   // Mock statistics data
@@ -10,6 +11,35 @@ const Dashboard = () => {
     suspiciousUrls: 11,
     maliciousUrls: 3,
   };
+
+  // Risk distribution data for pie chart
+  const riskDistributionData = [
+    { name: 'Safe', value: 142, color: 'hsl(142, 76%, 36%)' },
+    { name: 'Suspicious', value: 11, color: 'hsl(45, 93%, 47%)' },
+    { name: 'Malicious', value: 3, color: 'hsl(0, 84%, 60%)' },
+  ];
+
+  // Threat overview data for area chart
+  const threatOverviewData = [
+    { date: 'Mon', safe: 20, suspicious: 2, malicious: 0 },
+    { date: 'Tue', safe: 25, suspicious: 1, malicious: 1 },
+    { date: 'Wed', safe: 18, suspicious: 3, malicious: 0 },
+    { date: 'Thu', safe: 22, suspicious: 2, malicious: 1 },
+    { date: 'Fri', safe: 30, suspicious: 1, malicious: 0 },
+    { date: 'Sat', safe: 15, suspicious: 1, malicious: 1 },
+    { date: 'Sun', safe: 12, suspicious: 1, malicious: 0 },
+  ];
+
+  // Threat detection timeline data
+  const threatTimelineData = [
+    { time: '00:00', threats: 0 },
+    { time: '04:00', threats: 1 },
+    { time: '08:00', threats: 3 },
+    { time: '12:00', threats: 2 },
+    { time: '16:00', threats: 4 },
+    { time: '20:00', threats: 1 },
+    { time: '24:00', threats: 0 },
+  ];
 
   const recentActivity = [
     { url: 'https://example.com/safe', status: 'safe', time: '2 min ago' },
@@ -103,6 +133,133 @@ const Dashboard = () => {
             </CardContent>
           </Card>
         </div>
+
+        {/* Charts Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          {/* Threat Overview Chart */}
+          <Card className="bg-card border-border">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <TrendingUp className="w-5 h-5 text-primary" />
+                Threat Overview
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="h-[300px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={threatOverviewData}>
+                    <defs>
+                      <linearGradient id="colorSafe" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="hsl(142, 76%, 36%)" stopOpacity={0.8}/>
+                        <stop offset="95%" stopColor="hsl(142, 76%, 36%)" stopOpacity={0.1}/>
+                      </linearGradient>
+                      <linearGradient id="colorSuspicious" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="hsl(45, 93%, 47%)" stopOpacity={0.8}/>
+                        <stop offset="95%" stopColor="hsl(45, 93%, 47%)" stopOpacity={0.1}/>
+                      </linearGradient>
+                      <linearGradient id="colorMalicious" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="hsl(0, 84%, 60%)" stopOpacity={0.8}/>
+                        <stop offset="95%" stopColor="hsl(0, 84%, 60%)" stopOpacity={0.1}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(240, 3.7%, 15.9%)" />
+                    <XAxis dataKey="date" stroke="hsl(240, 5%, 64.9%)" fontSize={12} />
+                    <YAxis stroke="hsl(240, 5%, 64.9%)" fontSize={12} />
+                    <Tooltip 
+                      contentStyle={{ 
+                        backgroundColor: 'hsl(240, 10%, 3.9%)', 
+                        border: '1px solid hsl(240, 3.7%, 15.9%)',
+                        borderRadius: '8px'
+                      }} 
+                    />
+                    <Legend />
+                    <Area type="monotone" dataKey="safe" stackId="1" stroke="hsl(142, 76%, 36%)" fill="url(#colorSafe)" name="Safe" />
+                    <Area type="monotone" dataKey="suspicious" stackId="1" stroke="hsl(45, 93%, 47%)" fill="url(#colorSuspicious)" name="Suspicious" />
+                    <Area type="monotone" dataKey="malicious" stackId="1" stroke="hsl(0, 84%, 60%)" fill="url(#colorMalicious)" name="Malicious" />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Risk Distribution Pie Chart */}
+          <Card className="bg-card border-border">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Shield className="w-5 h-5 text-primary" />
+                Risk Distribution
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="h-[300px] flex items-center justify-center">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={riskDistributionData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={60}
+                      outerRadius={100}
+                      paddingAngle={5}
+                      dataKey="value"
+                      label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                      labelLine={false}
+                    >
+                      {riskDistributionData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} stroke="transparent" />
+                      ))}
+                    </Pie>
+                    <Tooltip 
+                      contentStyle={{ 
+                        backgroundColor: 'hsl(240, 10%, 3.9%)', 
+                        border: '1px solid hsl(240, 3.7%, 15.9%)',
+                        borderRadius: '8px'
+                      }} 
+                    />
+                    <Legend />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Threat Detection Timeline */}
+        <Card className="bg-card border-border mb-8">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Activity className="w-5 h-5 text-primary" />
+              Threat Detection Timeline
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[250px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={threatTimelineData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(240, 3.7%, 15.9%)" />
+                  <XAxis dataKey="time" stroke="hsl(240, 5%, 64.9%)" fontSize={12} />
+                  <YAxis stroke="hsl(240, 5%, 64.9%)" fontSize={12} />
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: 'hsl(240, 10%, 3.9%)', 
+                      border: '1px solid hsl(240, 3.7%, 15.9%)',
+                      borderRadius: '8px'
+                    }} 
+                  />
+                  <Line 
+                    type="monotone" 
+                    dataKey="threats" 
+                    stroke="hsl(0, 84%, 60%)" 
+                    strokeWidth={2}
+                    dot={{ fill: 'hsl(0, 84%, 60%)', strokeWidth: 2 }}
+                    activeDot={{ r: 6, fill: 'hsl(0, 84%, 60%)' }}
+                    name="Threats Detected"
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Recent Activity */}
         <Card className="bg-card border-border">
