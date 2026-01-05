@@ -18,21 +18,23 @@ export function QRScanner({ onScan, isActive, onToggle }: QRScannerProps) {
   const [isInitializing, setIsInitializing] = useState(false);
   const [isProcessingFile, setIsProcessingFile] = useState(false);
   const [dragActive, setDragActive] = useState(false);
+  const [isScannerRunning, setIsScannerRunning] = useState(false);
 
   useEffect(() => {
     return () => {
-      if (scannerRef.current) {
+      if (scannerRef.current && isScannerRunning) {
         scannerRef.current.stop().catch(console.error);
       }
     };
-  }, []);
+  }, [isScannerRunning]);
 
   useEffect(() => {
     const startScanner = async () => {
       if (!isActive) {
-        if (scannerRef.current) {
+        if (scannerRef.current && isScannerRunning) {
           try {
             await scannerRef.current.stop();
+            setIsScannerRunning(false);
           } catch (err) {
             console.error('Error stopping scanner:', err);
           }
@@ -62,16 +64,20 @@ export function QRScanner({ onScan, isActive, onToggle }: QRScannerProps) {
             // Ignore scan failures
           }
         );
+        setIsScannerRunning(true);
       } catch (err) {
         console.error('Error starting scanner:', err);
         setError('Unable to access camera. Please ensure camera permissions are granted.');
+        setIsScannerRunning(false);
+        // Reset isActive state since scanner failed to start
+        onToggle();
       } finally {
         setIsInitializing(false);
       }
     };
 
     startScanner();
-  }, [isActive, onScan]);
+  }, [isActive, onScan, onToggle, isScannerRunning]);
 
   const handleFileUpload = async (file: File) => {
     if (!file.type.startsWith('image/')) {
