@@ -59,7 +59,7 @@ const History = () => {
       {/* Header */}
       <header className="border-b border-border bg-card sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-center gap-8">
             <Link to="/" className="flex items-center gap-2">
               <Shield className="w-6 h-6 text-primary" />
               <span className="font-bold text-lg text-white">SecureQR</span>
