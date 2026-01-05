@@ -55,13 +55,17 @@ const Dashboard = () => {
       <header className="border-b border-border bg-card sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-6">
-              <Link to="/" className="text-sm text-muted-foreground hover:text-foreground">Scanner</Link>
-              <Link to="/dashboard" className="text-sm text-foreground font-medium">Dashboard</Link>
-              <Link to="/history" className="text-sm text-muted-foreground hover:text-foreground">History</Link>
-            </div>
+            <Link to="/" className="flex items-center gap-2">
+              <Shield className="w-6 h-6 text-primary" />
+              <span className="font-bold text-lg text-white">SecureQR</span>
+            </Link>
+            <nav className="flex items-center gap-8">
+              <Link to="/" className="text-sm text-muted-foreground hover:text-white transition-colors">Scanner</Link>
+              <Link to="/dashboard" className="text-sm text-white font-medium">Dashboard</Link>
+              <Link to="/history" className="text-sm text-muted-foreground hover:text-white transition-colors">History</Link>
+            </nav>
             <Link to="/auth">
-              <Button variant="outline" size="sm" className="border-primary text-primary hover:bg-primary hover:text-primary-foreground">
+              <Button variant="outline" size="sm" className="border-white/30 text-white hover:bg-white hover:text-background">
                 Sign In
               </Button>
             </Link>
@@ -212,10 +216,13 @@ const Dashboard = () => {
                     </Pie>
                     <Tooltip 
                       contentStyle={{ 
-                        backgroundColor: 'hsl(240, 10%, 3.9%)', 
-                        border: '1px solid hsl(240, 3.7%, 15.9%)',
-                        borderRadius: '8px'
-                      }} 
+                        backgroundColor: 'hsl(240, 10%, 10%)', 
+                        border: '1px solid hsl(240, 3.7%, 25%)',
+                        borderRadius: '8px',
+                        color: 'white'
+                      }}
+                      itemStyle={{ color: 'white' }}
+                      labelStyle={{ color: 'white' }}
                     />
                     <Legend />
                   </PieChart>

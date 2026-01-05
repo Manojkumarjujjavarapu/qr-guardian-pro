@@ -60,13 +60,17 @@ const History = () => {
       <header className="border-b border-border bg-card sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-6">
-              <Link to="/" className="text-sm text-muted-foreground hover:text-foreground">Scanner</Link>
-              <Link to="/dashboard" className="text-sm text-muted-foreground hover:text-foreground">Dashboard</Link>
-              <Link to="/history" className="text-sm text-foreground font-medium">History</Link>
-            </div>
+            <Link to="/" className="flex items-center gap-2">
+              <Shield className="w-6 h-6 text-primary" />
+              <span className="font-bold text-lg text-white">SecureQR</span>
+            </Link>
+            <nav className="flex items-center gap-8">
+              <Link to="/" className="text-sm text-muted-foreground hover:text-white transition-colors">Scanner</Link>
+              <Link to="/dashboard" className="text-sm text-muted-foreground hover:text-white transition-colors">Dashboard</Link>
+              <Link to="/history" className="text-sm text-white font-medium">History</Link>
+            </nav>
             <Link to="/auth">
-              <Button variant="outline" size="sm" className="border-primary text-primary hover:bg-primary hover:text-primary-foreground">
+              <Button variant="outline" size="sm" className="border-white/30 text-white hover:bg-white hover:text-background">
                 Sign In
               </Button>
             </Link>
@@ -77,7 +81,7 @@ const History = () => {
       <main className="container mx-auto px-4 py-8">
         {/* Page Title */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2 text-foreground">Scan History</h1>
+          <h1 className="text-3xl font-bold mb-2 text-white">Scan History</h1>
           <p className="text-muted-foreground">View and manage your past QR code scans</p>
         </div>
 
