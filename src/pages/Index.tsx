@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { Shield, Scan, BarChart3, Github, Twitter, Mail, Heart, AlertTriangle, CheckCircle, TrendingUp, Clock, Activity, Trash2, Search, Filter } from 'lucide-react';
 import { QRScanner } from '@/components/QRScanner';
 import { ScanResult } from '@/components/ScanResult';
@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Link } from 'react-router-dom';
 import { PieChart, Pie, Cell, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, Legend } from 'recharts';
+import { format, subDays, startOfDay, isWithinInterval, subHours } from 'date-fns';
 
 const Index = () => {
   const [scannerActive, setScannerActive] = useState(false);
@@ -60,46 +61,85 @@ const Index = () => {
     }
   };
 
-  // Dashboard mock data
-  const stats = {
-    totalScans: history.length || 156,
-    safeUrls: history.filter(h => h.threatLevel === 'safe').length || 142,
-    suspiciousUrls: history.filter(h => h.threatLevel === 'suspicious').length || 11,
-    maliciousUrls: history.filter(h => h.threatLevel === 'malicious').length || 3,
-  };
+  // Dynamic dashboard stats from real history
+  const stats = useMemo(() => ({
+    totalScans: history.length,
+    safeUrls: history.filter(h => h.threatLevel === 'safe').length,
+    suspiciousUrls: history.filter(h => h.threatLevel === 'suspicious').length,
+    maliciousUrls: history.filter(h => h.threatLevel === 'malicious').length,
+  }), [history]);
 
-  const riskDistributionData = [
-    { name: 'Safe', value: stats.safeUrls, color: 'hsl(142, 76%, 36%)' },
-    { name: 'Suspicious', value: stats.suspiciousUrls, color: 'hsl(45, 93%, 47%)' },
-    { name: 'Malicious', value: stats.maliciousUrls, color: 'hsl(0, 84%, 60%)' },
-  ];
+  // Dynamic pie chart data
+  const riskDistributionData = useMemo(() => [
+    { name: 'Safe', value: stats.safeUrls || 0, color: 'hsl(142, 76%, 36%)' },
+    { name: 'Suspicious', value: stats.suspiciousUrls || 0, color: 'hsl(45, 93%, 47%)' },
+    { name: 'Malicious', value: stats.maliciousUrls || 0, color: 'hsl(0, 84%, 60%)' },
+  ], [stats]);
 
-  const threatOverviewData = [
-    { date: 'Mon', safe: 20, suspicious: 2, malicious: 0 },
-    { date: 'Tue', safe: 25, suspicious: 1, malicious: 1 },
-    { date: 'Wed', safe: 18, suspicious: 3, malicious: 0 },
-    { date: 'Thu', safe: 22, suspicious: 2, malicious: 1 },
-    { date: 'Fri', safe: 30, suspicious: 1, malicious: 0 },
-    { date: 'Sat', safe: 15, suspicious: 1, malicious: 1 },
-    { date: 'Sun', safe: 12, suspicious: 1, malicious: 0 },
-  ];
+  // Dynamic area chart data - group by last 7 days
+  const threatOverviewData = useMemo(() => {
+    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const last7Days = Array.from({ length: 7 }, (_, i) => {
+      const date = subDays(new Date(), 6 - i);
+      const dayStart = startOfDay(date);
+      const dayEnd = new Date(dayStart.getTime() + 24 * 60 * 60 * 1000 - 1);
+      
+      const dayScans = history.filter(h => {
+        const scanDate = new Date(h.timestamp);
+        return isWithinInterval(scanDate, { start: dayStart, end: dayEnd });
+      });
+      
+      return {
+        date: days[date.getDay()],
+        safe: dayScans.filter(h => h.threatLevel === 'safe').length,
+        suspicious: dayScans.filter(h => h.threatLevel === 'suspicious').length,
+        malicious: dayScans.filter(h => h.threatLevel === 'malicious').length,
+      };
+    });
+    return last7Days;
+  }, [history]);
 
-  const threatTimelineData = [
-    { time: '00:00', threats: 0 },
-    { time: '04:00', threats: 1 },
-    { time: '08:00', threats: 3 },
-    { time: '12:00', threats: 2 },
-    { time: '16:00', threats: 4 },
-    { time: '20:00', threats: 1 },
-    { time: '24:00', threats: 0 },
-  ];
+  // Dynamic timeline data - group by hour for last 24 hours
+  const threatTimelineData = useMemo(() => {
+    const hours = [0, 4, 8, 12, 16, 20, 24];
+    return hours.map(hour => {
+      const startHour = subHours(new Date(), 24 - hour);
+      const endHour = subHours(new Date(), 24 - hour - 4);
+      
+      const threats = history.filter(h => {
+        const scanDate = new Date(h.timestamp);
+        return scanDate >= startHour && scanDate < endHour && h.threatLevel !== 'safe';
+      }).length;
+      
+      return {
+        time: `${hour.toString().padStart(2, '0')}:00`,
+        threats,
+      };
+    });
+  }, [history]);
 
-  const recentActivity = [
-    { url: 'https://example.com/safe', status: 'safe', time: '2 min ago' },
-    { url: 'https://suspicious-site.xyz', status: 'suspicious', time: '15 min ago' },
-    { url: 'https://google.com', status: 'safe', time: '1 hour ago' },
-    { url: 'https://phishing-attempt.tk', status: 'malicious', time: '2 hours ago' },
-  ];
+  // Dynamic recent activity from actual history
+  const recentActivity = useMemo(() => {
+    return history.slice(0, 5).map(h => {
+      const now = new Date();
+      const scanTime = new Date(h.timestamp);
+      const diffMs = now.getTime() - scanTime.getTime();
+      const diffMins = Math.floor(diffMs / 60000);
+      const diffHours = Math.floor(diffMs / 3600000);
+      
+      let timeAgo;
+      if (diffMins < 1) timeAgo = 'Just now';
+      else if (diffMins < 60) timeAgo = `${diffMins} min ago`;
+      else if (diffHours < 24) timeAgo = `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+      else timeAgo = format(scanTime, 'MMM d');
+      
+      return {
+        url: h.url,
+        status: h.threatLevel,
+        time: timeAgo,
+      };
+    });
+  }, [history]);
 
   // History helpers
   const filteredHistory = history.filter(item => {
