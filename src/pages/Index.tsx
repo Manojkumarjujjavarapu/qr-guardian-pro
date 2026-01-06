@@ -60,51 +60,46 @@ const Index = () => {
     }
   };
 
-  // Dashboard data computed from real history
-  const safeCount = history.filter(h => h.threatLevel === 'safe').length;
-  const suspiciousCount = history.filter(h => h.threatLevel === 'suspicious').length;
-  const maliciousCount = history.filter(h => h.threatLevel === 'malicious').length;
-
+  // Dashboard mock data
   const stats = {
-    totalScans: history.length,
-    safeUrls: safeCount,
-    suspiciousUrls: suspiciousCount,
-    maliciousUrls: maliciousCount,
+    totalScans: history.length || 156,
+    safeUrls: history.filter(h => h.threatLevel === 'safe').length || 142,
+    suspiciousUrls: history.filter(h => h.threatLevel === 'suspicious').length || 11,
+    maliciousUrls: history.filter(h => h.threatLevel === 'malicious').length || 3,
   };
 
   const riskDistributionData = [
-    { name: 'Safe', value: safeCount || 1, color: 'hsl(142, 76%, 36%)' },
-    { name: 'Suspicious', value: suspiciousCount || 0, color: 'hsl(45, 93%, 47%)' },
-    { name: 'Malicious', value: maliciousCount || 0, color: 'hsl(0, 84%, 60%)' },
+    { name: 'Safe', value: stats.safeUrls, color: 'hsl(142, 76%, 36%)' },
+    { name: 'Suspicious', value: stats.suspiciousUrls, color: 'hsl(45, 93%, 47%)' },
+    { name: 'Malicious', value: stats.maliciousUrls, color: 'hsl(0, 84%, 60%)' },
   ];
 
-  // Generate threat overview from recent scans (group by simulated days)
-  const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-  const threatOverviewData = days.map((date, idx) => {
-    const dayScans = history.filter((_, i) => i % 7 === idx);
-    return {
-      date,
-      safe: dayScans.filter(h => h.threatLevel === 'safe').length,
-      suspicious: dayScans.filter(h => h.threatLevel === 'suspicious').length,
-      malicious: dayScans.filter(h => h.threatLevel === 'malicious').length,
-    };
-  });
+  const threatOverviewData = [
+    { date: 'Mon', safe: 20, suspicious: 2, malicious: 0 },
+    { date: 'Tue', safe: 25, suspicious: 1, malicious: 1 },
+    { date: 'Wed', safe: 18, suspicious: 3, malicious: 0 },
+    { date: 'Thu', safe: 22, suspicious: 2, malicious: 1 },
+    { date: 'Fri', safe: 30, suspicious: 1, malicious: 0 },
+    { date: 'Sat', safe: 15, suspicious: 1, malicious: 1 },
+    { date: 'Sun', safe: 12, suspicious: 1, malicious: 0 },
+  ];
 
-  // Generate threat timeline from recent scans (group by time slots)
-  const timeSlots = ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '24:00'];
-  const threatTimelineData = timeSlots.map((time, idx) => {
-    const slotScans = history.filter((_, i) => i % 7 === idx);
-    return {
-      time,
-      threats: slotScans.filter(h => h.threatLevel !== 'safe').length,
-    };
-  });
+  const threatTimelineData = [
+    { time: '00:00', threats: 0 },
+    { time: '04:00', threats: 1 },
+    { time: '08:00', threats: 3 },
+    { time: '12:00', threats: 2 },
+    { time: '16:00', threats: 4 },
+    { time: '20:00', threats: 1 },
+    { time: '24:00', threats: 0 },
+  ];
 
-  // Recent activity from actual history
-  const recentActivity = history.slice(0, 4).map((item, idx) => {
-    const timeAgo = idx === 0 ? 'Just now' : idx === 1 ? '2 min ago' : idx === 2 ? '5 min ago' : '10 min ago';
-    return { url: item.url, status: item.threatLevel, time: timeAgo };
-  });
+  const recentActivity = [
+    { url: 'https://example.com/safe', status: 'safe', time: '2 min ago' },
+    { url: 'https://suspicious-site.xyz', status: 'suspicious', time: '15 min ago' },
+    { url: 'https://google.com', status: 'safe', time: '1 hour ago' },
+    { url: 'https://phishing-attempt.tk', status: 'malicious', time: '2 hours ago' },
+  ];
 
   // History helpers
   const filteredHistory = history.filter(item => {
