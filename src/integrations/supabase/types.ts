@@ -16,27 +16,30 @@ export type Database = {
     Tables: {
       scan_history: {
         Row: {
+          details: Json
           id: string
-          reasons: string[]
           risk_score: number
           scanned_at: string
           threat_level: string
+          threats: string[]
           url: string
         }
         Insert: {
+          details?: Json
           id?: string
-          reasons?: string[]
           risk_score: number
           scanned_at?: string
           threat_level: string
+          threats?: string[]
           url: string
         }
         Update: {
+          details?: Json
           id?: string
-          reasons?: string[]
           risk_score?: number
           scanned_at?: string
           threat_level?: string
+          threats?: string[]
           url?: string
         }
         Relationships: []
