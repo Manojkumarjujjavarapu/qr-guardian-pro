@@ -35,7 +35,8 @@ export function ScanHistoryProvider({ children }: { children: ReactNode }) {
             url: row.url,
             threatLevel: row.threat_level as ThreatLevel,
             riskScore: row.risk_score,
-            reasons: row.reasons || [],
+            threats: row.threats || [],
+            details: row.details as AnalysisResult['details'],
             timestamp: new Date(row.scanned_at),
           }));
           setHistory(results);
@@ -60,7 +61,8 @@ export function ScanHistoryProvider({ children }: { children: ReactNode }) {
         url: result.url,
         threat_level: result.threatLevel,
         risk_score: result.riskScore,
-        reasons: result.reasons,
+        threats: result.threats,
+        details: result.details,
         scanned_at: result.timestamp.toISOString(),
       });
 
