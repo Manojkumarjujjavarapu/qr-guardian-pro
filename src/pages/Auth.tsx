@@ -1,34 +1,52 @@
-import { useState } from 'react';
-import { Shield, Mail, Lock, User, ArrowLeft } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useState, useEffect } from 'react';
+import { Shield, Mail, Lock, ArrowLeft } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Link, useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
 
 const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user, signIn, signUp } = useAuth();
 
   const [loginData, setLoginData] = useState({ email: '', password: '' });
-  const [signupData, setSignupData] = useState({ name: '', email: '', password: '', confirmPassword: '' });
+  const [signupData, setSignupData] = useState({ email: '', password: '', confirmPassword: '' });
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (user) {
+      navigate('/');
+    }
+  }, [user, navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    // Simulate login
-    setTimeout(() => {
-      setIsLoading(false);
+    const { error } = await signIn(loginData.email, loginData.password);
+
+    setIsLoading(false);
+
+    if (error) {
       toast({
-        title: 'Login Successful',
-        description: 'Welcome back to SecureQR!',
+        title: 'Login Failed',
+        description: error.message,
+        variant: 'destructive',
       });
-      navigate('/');
-    }, 1500);
+      return;
+    }
+
+    toast({
+      title: 'Login Successful',
+      description: 'Welcome back to SecureQR!',
+    });
+    navigate('/');
   };
 
   const handleSignup = async (e: React.FormEvent) => {
@@ -43,17 +61,35 @@ const Auth = () => {
       return;
     }
 
+    if (signupData.password.length < 6) {
+      toast({
+        title: 'Error',
+        description: 'Password must be at least 6 characters',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     setIsLoading(true);
 
-    // Simulate signup
-    setTimeout(() => {
-      setIsLoading(false);
+    const { error } = await signUp(signupData.email, signupData.password);
+
+    setIsLoading(false);
+
+    if (error) {
       toast({
-        title: 'Account Created',
-        description: 'Welcome to SecureQR!',
+        title: 'Signup Failed',
+        description: error.message,
+        variant: 'destructive',
       });
-      navigate('/');
-    }, 1500);
+      return;
+    }
+
+    toast({
+      title: 'Account Created',
+      description: 'Welcome to SecureQR!',
+    });
+    navigate('/');
   };
 
   return (
@@ -127,31 +163,11 @@ const Auth = () => {
                     <Button type="submit" className="w-full" disabled={isLoading}>
                       {isLoading ? 'Signing in...' : 'Sign In'}
                     </Button>
-
-                    <p className="text-center text-sm text-muted-foreground">
-                      <a href="#" className="hover:text-foreground">Forgot password?</a>
-                    </p>
                   </form>
                 </TabsContent>
 
                 <TabsContent value="signup">
                   <form onSubmit={handleSignup} className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="signup-name">Full Name</Label>
-                      <div className="relative">
-                        <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                        <Input
-                          id="signup-name"
-                          type="text"
-                          placeholder="John Doe"
-                          value={signupData.name}
-                          onChange={(e) => setSignupData({ ...signupData, name: e.target.value })}
-                          className="pl-10 bg-background"
-                          required
-                        />
-                      </div>
-                    </div>
-
                     <div className="space-y-2">
                       <Label htmlFor="signup-email">Email</Label>
                       <div className="relative">
@@ -180,6 +196,7 @@ const Auth = () => {
                           onChange={(e) => setSignupData({ ...signupData, password: e.target.value })}
                           className="pl-10 bg-background"
                           required
+                          minLength={6}
                         />
                       </div>
                     </div>
@@ -196,6 +213,7 @@ const Auth = () => {
                           onChange={(e) => setSignupData({ ...signupData, confirmPassword: e.target.value })}
                           className="pl-10 bg-background"
                           required
+                          minLength={6}
                         />
                       </div>
                     </div>

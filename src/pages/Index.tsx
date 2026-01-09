@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo } from 'react';
-import { Shield, Scan, BarChart3, Github, Twitter, Mail, Heart, AlertTriangle, CheckCircle, TrendingUp, Clock, Activity, Trash2, Search, Filter } from 'lucide-react';
+import { Shield, Scan, BarChart3, Github, Twitter, Mail, Heart, AlertTriangle, CheckCircle, TrendingUp, Clock, Activity, Trash2, Search, Filter, LogOut } from 'lucide-react';
 import { QRScanner } from '@/components/QRScanner';
 import { ScanResult } from '@/components/ScanResult';
 import { ScanHistory } from '@/components/ScanHistory';
@@ -7,6 +7,7 @@ import { ManualInput } from '@/components/ManualInput';
 import { analyzeUrl, AnalysisResult } from '@/lib/urlAnalyzer';
 import { useToast } from '@/hooks/use-toast';
 import { useScanHistory } from '@/context/ScanHistoryContext';
+import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -18,9 +19,18 @@ const Index = () => {
   const [scannerActive, setScannerActive] = useState(false);
   const [currentResult, setCurrentResult] = useState<AnalysisResult | null>(null);
   const { history, addToHistory, clearHistory } = useScanHistory();
+  const { user, signOut } = useAuth();
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('all');
+
+  const handleSignOut = async () => {
+    await signOut();
+    toast({
+      title: 'Signed Out',
+      description: 'You have been signed out successfully.',
+    });
+  };
 
   const handleScan = useCallback((data: string) => {
     const result = analyzeUrl(data);
@@ -190,11 +200,26 @@ const Index = () => {
               <button onClick={() => scrollToSection('dashboard')} className="text-sm text-muted-foreground hover:text-white transition-colors">Dashboard</button>
               <button onClick={() => scrollToSection('history')} className="text-sm text-muted-foreground hover:text-white transition-colors">History</button>
             </nav>
-            <Link to="/auth">
-              <Button variant="outline" size="sm" className="border-white/30 text-white hover:bg-white hover:text-background">
-                Sign In
-              </Button>
-            </Link>
+            {user ? (
+              <div className="flex items-center gap-3">
+                <span className="text-sm text-muted-foreground">{user.email}</span>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="border-white/30 text-white hover:bg-white hover:text-background"
+                  onClick={handleSignOut}
+                >
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Sign Out
+                </Button>
+              </div>
+            ) : (
+              <Link to="/auth">
+                <Button variant="outline" size="sm" className="border-white/30 text-white hover:bg-white hover:text-background">
+                  Sign In
+                </Button>
+              </Link>
+            )}
           </div>
         </div>
       </header>

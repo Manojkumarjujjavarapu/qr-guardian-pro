@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useCallback, useEffect, ReactNode } from 'react';
 import { AnalysisResult, ThreatLevel } from '@/lib/urlAnalyzer';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
 
 interface ScanHistoryContextType {
   history: AnalysisResult[];
@@ -14,14 +15,23 @@ const ScanHistoryContext = createContext<ScanHistoryContextType | undefined>(und
 export function ScanHistoryProvider({ children }: { children: ReactNode }) {
   const [history, setHistory] = useState<AnalysisResult[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const { user } = useAuth();
 
-  // Fetch history from database on mount
+  // Fetch history from database when user changes
   useEffect(() => {
     const fetchHistory = async () => {
+      // Clear history if no user
+      if (!user) {
+        setHistory([]);
+        setIsLoading(false);
+        return;
+      }
+
       try {
         const { data, error } = await supabase
           .from('scan_history')
           .select('*')
+          .eq('user_id', user.id)
           .order('scanned_at', { ascending: false })
           .limit(50);
 
@@ -49,13 +59,20 @@ export function ScanHistoryProvider({ children }: { children: ReactNode }) {
     };
 
     fetchHistory();
-  }, []);
+  }, [user]);
 
   const addToHistory = useCallback(async (result: AnalysisResult) => {
+    // Only save if user is logged in
+    if (!user) {
+      // Still show locally but don't persist
+      setHistory((prev) => [result, ...prev.slice(0, 49)]);
+      return;
+    }
+
     // Optimistically update local state
     setHistory((prev) => [result, ...prev.slice(0, 49)]);
 
-    // Persist to database
+    // Persist to database with user_id
     try {
       const { error } = await supabase.from('scan_history').insert({
         url: result.url,
@@ -64,6 +81,7 @@ export function ScanHistoryProvider({ children }: { children: ReactNode }) {
         threats: result.threats,
         details: result.details,
         scanned_at: result.timestamp.toISOString(),
+        user_id: user.id,
       });
 
       if (error) {
@@ -72,15 +90,23 @@ export function ScanHistoryProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error('Error saving scan to history:', error);
     }
-  }, []);
+  }, [user]);
 
   const clearHistory = useCallback(async () => {
+    if (!user) {
+      setHistory([]);
+      return;
+    }
+
     // Optimistically clear local state
     setHistory([]);
 
-    // Delete from database
+    // Delete from database (only user's own records)
     try {
-      const { error } = await supabase.from('scan_history').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+      const { error } = await supabase
+        .from('scan_history')
+        .delete()
+        .eq('user_id', user.id);
 
       if (error) {
         console.error('Error clearing scan history:', error);
@@ -88,7 +114,7 @@ export function ScanHistoryProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error('Error clearing scan history:', error);
     }
-  }, []);
+  }, [user]);
 
   return (
     <ScanHistoryContext.Provider value={{ history, addToHistory, clearHistory, isLoading }}>

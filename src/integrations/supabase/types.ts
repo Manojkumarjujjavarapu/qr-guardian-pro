@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      profiles: {
+        Row: {
+          created_at: string
+          email: string | null
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       scan_history: {
         Row: {
           details: Json
@@ -23,6 +47,7 @@ export type Database = {
           threat_level: string
           threats: string[]
           url: string
+          user_id: string | null
         }
         Insert: {
           details?: Json
@@ -32,6 +57,7 @@ export type Database = {
           threat_level: string
           threats?: string[]
           url: string
+          user_id?: string | null
         }
         Update: {
           details?: Json
@@ -41,6 +67,7 @@ export type Database = {
           threat_level?: string
           threats?: string[]
           url?: string
+          user_id?: string | null
         }
         Relationships: []
       }
