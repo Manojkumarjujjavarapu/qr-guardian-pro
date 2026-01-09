@@ -114,7 +114,7 @@ const Auth = () => {
                 <Shield className="w-12 h-12 text-primary" />
               </div>
             </div>
-            <h1 className="text-2xl font-bold">SecureQR</h1>
+            <h1 className="text-2xl font-bold text-foreground">SecureQR</h1>
             <p className="text-muted-foreground">AI-Powered Security</p>
           </div>
 
